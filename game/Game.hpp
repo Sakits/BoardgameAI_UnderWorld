@@ -14,13 +14,19 @@ namespace py = pybind11;
 class Game
 {
 public:
-    int n, win_n, now_player;
+    const int n, win_n;
+    int now_player;
     std::vector <std::vector<char>> board;
     std::vector <char> valids;
+
+    const int feat_cnt = 2;
+    std::vector <std::vector<char>> feat[2];
 
     Game(int _n, int _win_n);
     
     void init();
+
+    int getActionSize();
 
     void get_next_state(int action);
 
@@ -30,7 +36,11 @@ public:
 
     void get_canonical_form();
 
+    void get_feature();
+
     std::string string_representation();
+
+    void display(py::array_t<char> pyboard);
 
 /* -------------------------- py API --------------------------*/
 
@@ -38,11 +48,13 @@ public:
 
     py::array_t<char> return_board();
 
+    py::array_t<char> return_feature();
+
     py::array_t<char> getInitBoard();
 
-    py::tuple getBoardSize();
+    py::tuple getBoardSize() const;
 
-    int getActionSize();
+    py::tuple getFeatureSize() const;
 
     py::tuple getNextState(py::array_t<char> pyboard, int player, int action);
 
@@ -52,7 +64,7 @@ public:
 
     py::array_t<char> getCanonicalForm(py::array_t<char> pyboard, int player);
 
-    void display(py::array_t<char> pyboard);
+    py::array_t<char> getFeature(py::array_t<char> pyboard);
 
     std::string stringRepresentation(py::array_t<char> pyboard);
 };

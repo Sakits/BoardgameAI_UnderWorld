@@ -78,7 +78,8 @@ class SelfPlayAgent(mp.Process):
                 self.canonical[i], temp, not self.fast)
             action = np.random.choice(len(policy), p=policy)
             if not self.fast:
-                self.histories[i].append((self.canonical[i], self.mcts[i].getExpertProb(self.canonical[i], prune=True), self.player[i]))
+                self.histories[i].append((self.game.getFeature(self.canonical[i]), 
+                    self.mcts[i].getExpertProb(self.canonical[i], prune=True), self.player[i]))
             self.games[i], self.player[i] = self.game.getNextState(self.games[i], self.player[i], action)
             self.turn[i] += 1
             winner = self.game.getGameEnded(self.games[i], 1)

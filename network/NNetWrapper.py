@@ -22,7 +22,7 @@ args = dotdict({
 class NNetWrapper():
     def __init__(self, game):
         self.nnet = nnetarch(game, args)
-        self.board_x, self.board_y = game.getBoardSize()
+        self.feat_cnt, self.board_x, self.board_y = game.getFeatureSize()
         self.action_size = game.getActionSize()
         self.optimizer = optim.Adam(
             self.nnet.parameters(), lr=args.lr, betas=(0.9, 0.999), weight_decay= 1e-4, eps = 1e-8)
@@ -107,7 +107,7 @@ class NNetWrapper():
         if args.cuda:
             board = board.contiguous().cuda()
         with torch.no_grad():
-            board = board.view(1, self.board_x, self.board_y)
+            board = board.view(self.feat_cnt, self.board_x, self.board_y)
 
             self.nnet.eval()
             pi, v = self.nnet(board)

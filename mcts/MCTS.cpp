@@ -247,7 +247,7 @@ public:
         {
             status = 1;
             _v = -mcts[x].Es;
-            return std::make_pair(false, mcts[x].game.return_board());
+            return std::make_pair(false, mcts[x].game.return_feature());
         }
 
         if (mcts[x].Ps.empty())
@@ -255,7 +255,7 @@ public:
             status = 0;
             mcts[x].Ps.resize(mcts[x].game.getActionSize());
             path.push_back(std::make_pair(x, -1));
-            return std::make_pair(true, mcts[x].game.return_board());
+            return std::make_pair(true, mcts[x].game.return_feature());
         }
 
         double cur_best = -1e9;
@@ -301,7 +301,7 @@ public:
 
         if (mcts[x].Ps.empty())
         {
-            auto nnet = nn(mcts[x].game.return_board()).cast<std::pair<py::array_t<double>, double>>();
+            auto nnet = nn(mcts[x].game.return_feature()).cast<std::pair<py::array_t<double>, double>>();
             mcts[x].Ps.resize(mcts[x].game.getActionSize());
             double sum = 0;
             double* ptr = static_cast<double *>(nnet.first.request().ptr);
@@ -370,7 +370,9 @@ PYBIND11_MODULE(libcpp, m) {
         .def("getGameEnded", &Game::getGameEnded)
         .def("getCanonicalForm", &Game::getCanonicalForm)
         .def("stringRepresentation", &Game::stringRepresentation)
-        .def("display", &Game::display);
+        .def("display", &Game::display)
+        .def("getFeatureSize", &Game::getFeatureSize)
+        .def("getFeature", &Game::getFeature);
 
     py::class_<MCTS>(m, "MCTS")
         .def(py::init<const Game &, const py::object, int, double>())

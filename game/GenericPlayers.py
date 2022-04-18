@@ -18,7 +18,7 @@ class NNPlayer:
         self.temp_threshold = temp_threshold
 
     def play(self, board, turn):
-        policy, _ = self.nn.predict(board)
+        policy, _ = self.nn.predict(self.game.getFeature(board))
         valids = self.game.getValidMoves(board, 1)
         options = policy * valids
         temp = 1 if turn <= self.temp_threshold else self.temp

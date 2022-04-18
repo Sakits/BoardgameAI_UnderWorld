@@ -3,7 +3,6 @@ from libcpp import MCTS
 class MCTSWrapper():
     
     def __init__(self, game, nnet, args):
-        # self.nnet = nnet
         self.mcts = MCTS(game, nnet.predict if nnet else None, args.num_MCTS_sims, args.cpuct)
         self.reset()
 

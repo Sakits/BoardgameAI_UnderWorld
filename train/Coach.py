@@ -70,10 +70,10 @@ class Coach:
 
     def generateSelfPlayAgents(self):
         self.ready_queue = mp.Queue()
-        boardx, boardy = self.game.getBoardSize()
+        feat_cnt, boardx, boardy = self.game.getFeatureSize()
         for i in range(self.args.workers):
             self.input_tensors.append(torch.zeros(
-                [self.args.process_batch_size, boardx, boardy]))
+                [self.args.process_batch_size, feat_cnt, boardx, boardy]))
             self.input_tensors[i].pin_memory()
             self.input_tensors[i].share_memory_()
 
@@ -147,8 +147,8 @@ class Coach:
     def saveIterationSamples(self, iteration):
         num_samples = self.file_queue.qsize()
         print(f'Saving {num_samples} samples')
-        boardx, boardy = self.game.getBoardSize()
-        data_tensor = torch.zeros([num_samples, boardx, boardy])
+        feat_cnt, boardx, boardy = self.game.getFeatureSize()
+        data_tensor = torch.zeros([num_samples, feat_cnt, boardx, boardy])
         policy_tensor = torch.zeros([num_samples, self.game.getActionSize()])
         value_tensor = torch.zeros([num_samples, 1])
         for i in range(num_samples):

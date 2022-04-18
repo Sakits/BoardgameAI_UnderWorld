@@ -20,6 +20,18 @@ void Game::init()
     for (int i = 0; i < n * n; i++)
         valids[i] = 1;
     valids[n * n] = 0;
+
+    for (int k = 0; k < feat_cnt; k++)
+    {
+        feat[k].resize(n);
+        for (int i = 0; i < n; i++)
+            feat[k][i].resize(n);
+    }
+}
+
+int Game::getActionSize()
+{
+    return n * n + 1;
 }
 
 void Game::get_next_state(int action)
@@ -81,6 +93,16 @@ void Game::get_canonical_form()
     now_player = 1;
 }
 
+void Game::get_feature()
+{
+    for (int i = 0; i < n; i++)
+        for (int j = 0; j < n; j++)
+        {
+            feat[0][i][j] = board[i][j];
+            feat[1][i][j] = 1;
+        }
+}
+
 std::string Game::string_representation()
 {
     std::string s = "";
@@ -89,6 +111,24 @@ std::string Game::string_representation()
             s += board[i][j] == 1 ? "w" : (board[i][j] == -1 ? "b" : " ");
 
     return s;
+}
+
+void Game::display(py::array_t<char> pyboard)
+{
+    get_board(pyboard, 1);
+
+    for (int i = 0; i < n; i++)
+        printf("%d |", i);
+    puts("");
+    puts(" -----------------------");
+    for (int i = 0; i < n; i++)
+    {
+        printf("%d |", i);
+        for (int j = 0; j < n; j++)
+            printf("%s ", board[i][j] == 1 ? "w" : (board[i][j] == -1 ? "b" : " "));
+        puts("|");
+    }
+    puts(" -----------------------");
 }
 
 /* -------------------------- py API --------------------------*/
@@ -116,42 +156,52 @@ py::array_t<char> Game::return_board()
     return pyboard;
 }
 
+py::array_t<char> Game::return_feature() 
+{
+    get_feature();
+
+    auto pyfeat = py::array_t<char>(feat_cnt * n * n);
+    char* ptr = static_cast<char *>(pyfeat.request().ptr);
+    for (int k = 0; k < feat_cnt; k++)
+        for (int i = 0; i < n; i++)
+            for (int j = 0; j < n; j++)
+                ptr[k * n * n + i * n + j] = feat[k][i][j];
+
+    pyfeat.resize({feat_cnt, n, n});
+    return pyfeat;
+}
+
 py::array_t<char> Game::getInitBoard()
 {
     init();
-
     return return_board();
 }
 
-py::tuple Game::getBoardSize()
+py::tuple Game::getBoardSize() const
 {
     return py::make_tuple(n, n);
 }
 
-int Game::getActionSize()
+py::tuple Game::getFeatureSize() const
 {
-    return n * n + 1;
+    return py::make_tuple(feat_cnt, n, n);
 }
 
 py::tuple Game::getNextState(py::array_t<char> pyboard, int player, int action)
 {
     get_board(pyboard, player);
-
     get_next_state(action);
-
     return py::make_tuple(return_board(), now_player);
 }
 
 py::array_t<char> Game::getValidMoves(py::array_t<char> pyboard, int player)
 {
     get_board(pyboard, player);
-
     get_valid_moves();
-
-    auto pyvalids = py::array_t<char>(n * n + 1);
+    auto pyvalids = py::array_t<char>(getActionSize());
     char* ptr = static_cast<char *>(pyvalids.request().ptr);
 
-    for (int i = 0; i < n * n + 1; i++)
+    for (int i = 0; i < getActionSize(); i++)
         ptr[i] = valids[i];
 
     return pyvalids;
@@ -160,35 +210,20 @@ py::array_t<char> Game::getValidMoves(py::array_t<char> pyboard, int player)
 double Game::getGameEnded(py::array_t<char> pyboard, int player)
 {
     get_board(pyboard, player);
-
     return get_game_ended();
 }
 
 py::array_t<char> Game::getCanonicalForm(py::array_t<char> pyboard, int player)
 {
     get_board(pyboard, player);
-
     get_canonical_form();
-
     return return_board();
 }
 
-void Game::display(py::array_t<char> pyboard)
+py::array_t<char> Game::getFeature(py::array_t<char> pyboard)
 {
     get_board(pyboard, 1);
-
-    for (int i = 0; i < n; i++)
-        printf("%d |", i);
-    puts("");
-    puts(" -----------------------");
-    for (int i = 0; i < n; i++)
-    {
-        printf("%d |", i);
-        for (int j = 0; j < n; j++)
-            printf("%s ", board[i][j] == 1 ? "w" : (board[i][j] == -1 ? "b" : " "));
-        puts("|");
-    }
-    puts(" -----------------------");
+    return return_feature();
 }
 
 std::string Game::stringRepresentation(py::array_t<char> pyboard)

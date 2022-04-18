@@ -55,11 +55,11 @@ class NNetArchitecture(nn.Module):
     def __init__(self, game, args):
         super(NNetArchitecture, self).__init__()
         # game params
-        self.board_x, self.board_y = game.getBoardSize()
+        self.feat_cnt, self.board_x, self.board_y = game.getFeatureSize()
         self.action_size = game.getActionSize()
         self.args = args
 
-        self.conv1 = conv5x5(1, args.num_channels)
+        self.conv1 = conv5x5(self.feat_cnt, args.num_channels)
         self.bn1 = nn.BatchNorm2d(args.num_channels)
 
         self.res_layers1 = []
@@ -85,8 +85,8 @@ class NNetArchitecture(nn.Module):
         self.pi_fc1 = nn.Linear(self.board_x*self.board_y*2, self.action_size)
 
     def forward(self, s):
-        # batch_size x 1 x board_x x board_y
-        s = s.view(-1, 1, self.board_x, self.board_y)
+        # batch_size x feat_cnt x board_x x board_y
+        s = s.view(-1, self.feat_cnt, self.board_x, self.board_y)
         # batch_size x num_channels x board_x x board_y
         s = self.conv1(s)
         # batch_size x num_channels x board_x x board_y
