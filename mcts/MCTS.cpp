@@ -220,9 +220,10 @@ public:
             }
 
             mcts[x].Ns = 0;
-            _v = -value;
+            _v = value;
         }
 
+        reverse(path.begin(), path.end());
         for (uint j = 0; j < path.size(); j++)
         {
             int x = path[j].first, i = path[j].second;
