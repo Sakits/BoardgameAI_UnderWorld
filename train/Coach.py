@@ -14,7 +14,7 @@ from tensorboardX import SummaryWriter
 from mcts.MCTSWrapper import MCTSWrapper as MCTS
 from train.SelfPlayAgent import SelfPlayAgent
 from train.Arena import Arena
-from game.GenericPlayers import RandomPlayer, NNPlayer
+from game.Players import RandomPlayer, NNPlayer
 
 class Coach:
     def __init__(self, game, nnet, args):

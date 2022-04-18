@@ -2,7 +2,7 @@ import numpy as np
 from utils import *
 
 from train.Arena import Arena
-from game.GenericPlayers import *
+from game.Players import *
 from mcts.MCTSWrapper import MCTSWrapper as MCTS
 from network.NNetWrapper import NNetWrapper as NNet
 from libcpp import Game
