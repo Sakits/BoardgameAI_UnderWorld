@@ -1,5 +1,3 @@
-import pyximport; pyximport.install()
-
 from torch import multiprocessing as mp
 
 from train.Coach import Coach
