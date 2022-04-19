@@ -45,7 +45,7 @@ public:
     Game game;
     const py::object nn;
     const int num_MCTS_sims;
-    const double cpuct;
+    const double cpuct, epsilon;
     bool status;
     int root;
     double _v;
@@ -53,9 +53,10 @@ public:
     std::vector < std::pair<int, int> > path;
     std::vector <double> probs;
     std::vector <int> counts;
+    std::vector <double> noise;
 
-    MCTS(const Game &_game, const py::object _nn, int _num_MCTS_sims, double _cpuct) 
-        :game(_game), nn(_nn), num_MCTS_sims(_num_MCTS_sims), cpuct(_cpuct) 
+    MCTS(const Game &_game, const py::object _nn, int _num_MCTS_sims, double _cpuct, double _epsilon) 
+        :game(_game), nn(_nn), num_MCTS_sims(_num_MCTS_sims), cpuct(_cpuct), epsilon(_epsilon)
     {
         reset();
     }
@@ -68,6 +69,7 @@ public:
         game.init();
         probs.resize(game.getActionSize());
         counts.resize(game.getActionSize());
+        noise.resize(game.getActionSize());
         mcts.push_back(node(game));
     }
 
@@ -236,9 +238,14 @@ public:
         path.clear();
     }
 
-    std::pair<bool, py::array_t<char>> findLeafToProcess(py::array_t<char> canonicalBoard)
+    std::pair<bool, py::array_t<char>> findLeafToProcess(py::array_t<char> canonicalBoard, py::array_t<double> _noise)
     {
         find_root(canonicalBoard);
+
+        double* ptr = static_cast<double *>(_noise.request().ptr);
+            for (uint i = 0; i < noise.size(); i++)
+                noise[i] = ptr[i];
+
         return rollout(root);
     }
 
@@ -266,13 +273,8 @@ public:
         for (int i = 0; i < siz; i++)
             if (mcts[x].game.valids[i])
             {
-                if (x == root && mcts[x].son[i] && mcts[x].Nsa[i] < sqrt(2 * mcts[x].Ps[i] * mcts[x].Ns))
-                {
-                    best_act = i;
-                    break;
-                }
-
-                double value = mcts[x].Qsa[i] + cpuct * mcts[x].Ps[i] * sqrt(mcts[x].Ns) / (1 + mcts[x].Nsa[i]);
+                double p = (x == root) ? mcts[x].Ps[i] * (1 - epsilon) + noise[i] * epsilon : mcts[x].Ps[i];
+                double value = mcts[x].Qsa[i] + cpuct * p * sqrt(mcts[x].Ns) / (1 + mcts[x].Nsa[i]);
 
                 if (value > cur_best)
                 {
@@ -376,7 +378,7 @@ PYBIND11_MODULE(libcpp, m) {
         .def("getFeature", &Game::getFeature);
 
     py::class_<MCTS>(m, "MCTS")
-        .def(py::init<const Game &, const py::object, int, double>())
+        .def(py::init<const Game &, const py::object, int, double, double>())
         .def("reset", &MCTS::reset)
         .def("getActionProb", &MCTS::getActionProb)
         .def("getExpertProb", &MCTS::getExpertProb)

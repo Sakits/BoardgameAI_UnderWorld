@@ -8,10 +8,10 @@ from libcpp import Game
 
 args = dotdict({
     'run_name': 'game_data',
-    'workers': mp.cpu_count(),
+    'workers': 8,
     'start_iter': 1,
     'num_iters': 1000,
-    'process_batch_size': 64,
+    'process_batch_size': 128,
     'train_batch_size': 512,
     'train_steps_per_iteration': 1000,
     # Training Net may be slow if the value of max_sample_num is too small
@@ -20,6 +20,10 @@ args = dotdict({
     'max_games_per_iteration': 100000,
     'num_iters_for_train_examples_history': 50,
     'symmetric_samples': False,
+    # Dirichlet noise
+    'epsilon' : 0.25,
+    'alpha' : 0.1,  
+    # should be larger in larger board
     'num_MCTS_sims': 50,
     'num_fast_sims': 5,
     'prob_fast_sim': 0.75,
