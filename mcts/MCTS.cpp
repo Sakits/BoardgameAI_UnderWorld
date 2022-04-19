@@ -10,7 +10,7 @@ namespace py = pybind11;
 
 #include "../game/Game.hpp"
 
-const double eps = 1e-8;
+const double eps = 1e-6;
 using uint = unsigned int;
 
 class MCTS
@@ -95,7 +95,7 @@ public:
             int sum = 0;
             for (int i = 0; i < siz; i++)
                 sum += counts[i];
-            assert(sum > 0);
+            
             for (int i = 0; i < siz; i++)
                 probs[i] = 1.0 * counts[i] / sum;
         }
@@ -241,6 +241,7 @@ public:
     std::pair<bool, py::array_t<char>> findLeafToProcess(py::array_t<char> canonicalBoard, py::array_t<double> _noise)
     {
         find_root(canonicalBoard);
+        puts("??");
 
         double* ptr = static_cast<double *>(_noise.request().ptr);
             for (uint i = 0; i < noise.size(); i++)
@@ -274,7 +275,7 @@ public:
             if (mcts[x].game.valids[i])
             {
                 double p = (x == root) ? mcts[x].Ps[i] * (1 - epsilon) + noise[i] * epsilon : mcts[x].Ps[i];
-                double value = mcts[x].Qsa[i] + cpuct * p * sqrt(mcts[x].Ns) / (1 + mcts[x].Nsa[i]);
+                double value = mcts[x].Qsa[i] + cpuct * p * sqrt(mcts[x].Ns + eps) / (1 + mcts[x].Nsa[i]);
 
                 if (value > cur_best)
                 {
@@ -332,7 +333,7 @@ public:
         for (int i = 0; i < siz; i++)
             if (mcts[x].game.valids[i])
             {
-                double value = mcts[x].Qsa[i] + cpuct * mcts[x].Ps[i] * sqrt(mcts[x].Ns) / (1 + mcts[x].Nsa[i]);
+                double value = mcts[x].Qsa[i] + cpuct * mcts[x].Ps[i] * sqrt(mcts[x].Ns + eps) / (1 + mcts[x].Nsa[i]);
 
                 if (value > cur_best)
                 {
