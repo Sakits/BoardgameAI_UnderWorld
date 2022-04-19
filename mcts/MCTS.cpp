@@ -220,7 +220,7 @@ public:
             }
 
             mcts[x].Ns = 0;
-            _v = value;
+            _v = -value;
         }
 
         reverse(path.begin(), path.end());
