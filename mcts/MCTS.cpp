@@ -241,7 +241,6 @@ public:
     std::pair<bool, py::array_t<char>> findLeafToProcess(py::array_t<char> canonicalBoard, py::array_t<double> _noise)
     {
         find_root(canonicalBoard);
-        puts("??");
 
         double* ptr = static_cast<double *>(_noise.request().ptr);
             for (uint i = 0; i < noise.size(); i++)
