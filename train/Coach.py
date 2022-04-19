@@ -183,9 +183,9 @@ class Coach:
             else:
                 draws += 1
 
-        self.writer.add_scalar('win_rate (p1 vs p2)',
+        self.writer.add_scalar('win_rate/p1 vs p2',
                                (p1wins+0.5*draws)/num_games, iteration)
-        self.writer.add_scalar('draw_rate', draws/num_games, iteration)
+        self.writer.add_scalar('win_rate/draw', draws/num_games, iteration)
 
     def train(self, iteration):
         datasets = []
@@ -250,7 +250,7 @@ class Coach:
 
         print(f'NEW/PAST WINS : {nwins} / {pwins} ; DRAWS : {draws}\n')
         self.writer.add_scalar(
-            'win_rate to past', float(nwins + 0.5 * draws) / (pwins + nwins + draws), iteration)
+            'win_rate/to past', float(nwins + 0.5 * draws) / (pwins + nwins + draws), iteration)
 
     def compareToRandom(self, iteration):
         r = RandomPlayer(self.game)
@@ -262,4 +262,4 @@ class Coach:
 
         print(f'NEW/RANDOM WINS : {nwins} / {pwins} ; DRAWS : {draws}\n')
         self.writer.add_scalar(
-            'win_rate to random', float(nwins + 0.5 * draws) / (pwins + nwins + draws), iteration)
+            'win_rate/to random', float(nwins + 0.5 * draws) / (pwins + nwins + draws), iteration)
