@@ -23,9 +23,9 @@ args = dotdict({
     # Dirichlet noise
     'epsilon' : 0.25,
     'alpha' : 0.1,  
-    # should be larger in larger board
-    'num_MCTS_sims': 50,
-    'num_fast_sims': 5,
+    # should be larger than action size to get a better result
+    'num_MCTS_sims': 100,
+    'num_fast_sims': 10,
     'prob_fast_sim': 0.75,
     'temp_threshold': 10,
     'temp': 1,
