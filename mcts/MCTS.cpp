@@ -243,8 +243,11 @@ public:
         find_root(canonicalBoard);
 
         double* ptr = static_cast<double *>(_noise.request().ptr);
-            for (uint i = 0; i < noise.size(); i++)
-                noise[i] = ptr[i];
+        double sum = 0;
+        for (uint i = 0; i < noise.size(); i++)
+            noise[i] = ptr[i] * mcts[root].game.valids[i], sum += noise[i];
+        for (uint i = 0; i < noise.size(); i++)
+            noise[i] /= sum;
 
         return rollout(root);
     }
@@ -273,9 +276,15 @@ public:
         for (int i = 0; i < siz; i++)
             if (mcts[x].game.valids[i])
             {
+                // ensure minimum number of forced playouts for noise play
+                if (x == root && mcts[x].son[i] && mcts[x].Nsa[i] < sqrt(2 * mcts[x].Ps[i] * mcts[x].Ns))
+                {
+                    best_act = i;
+                    break;
+                }
+
                 double p = (x == root) ? mcts[x].Ps[i] * (1 - epsilon) + noise[i] * epsilon : mcts[x].Ps[i];
                 double value = mcts[x].Qsa[i] + cpuct * p * sqrt(mcts[x].Ns + eps) / (1 + mcts[x].Nsa[i]);
-
                 if (value > cur_best)
                 {
                     cur_best = value;

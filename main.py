@@ -20,10 +20,10 @@ args = dotdict({
     'max_games_per_iteration': 100000,
     'num_iters_for_train_examples_history': 50,
     'symmetric_samples': False,
-    # Dirichlet noise
-    'epsilon' : 0.25,
+    # Dirichlet noise (epsilon shouldn't be too large)
+    'epsilon' : 0.05,
     'alpha' : 0.1,  
-    # should be larger than action size to get a better result
+    # should be larger in larger board
     'num_MCTS_sims': 100,
     'num_fast_sims': 10,
     'prob_fast_sim': 0.75,
@@ -32,11 +32,11 @@ args = dotdict({
     'compare_with_random': True,
     'arena_compare_random': 500,
     'arena_compare': 500,
-    'arena_temp': 0.1,
+    'arena_temp': 1,
     'arena_MCTS': False,
     'random_compare_freq': 5,
     'compare_with_past': True,
-    'past_compare_freq': 5,
+    'past_compare_freq': 1,
     'cpuct': 3,
     'checkpoint': 'checkpoint',
     'data': 'data',
