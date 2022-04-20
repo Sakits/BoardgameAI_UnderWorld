@@ -5,7 +5,6 @@ class MCTSWrapper():
     
     def __init__(self, game, nnet, args):
         self.action = game.getActionSize()
-        self.alpha = args.alpha
         self.mcts = MCTS(game, nnet.predict if nnet else None, args.num_MCTS_sims, args.cpuct, args.epsilon)
         self.reset()
 
@@ -22,5 +21,5 @@ class MCTSWrapper():
         self.mcts.processResult(pi, value)
 
     def findLeafToProcess(self, canonicalBoard, isRoot):
-        flag, ans = self.mcts.findLeafToProcess(canonicalBoard, np.random.dirichlet([self.alpha] * self.action))
+        flag, ans = self.mcts.findLeafToProcess(canonicalBoard, np.random.dirichlet([0.1 / self.action] * self.action))
         return ans if flag else None
