@@ -246,8 +246,9 @@ public:
         double sum = 0;
         for (uint i = 0; i < noise.size(); i++)
             noise[i] = ptr[i] * mcts[root].game.valids[i], sum += noise[i];
-        for (uint i = 0; i < noise.size(); i++)
-            noise[i] /= sum;
+        if (sum > eps)
+            for (uint i = 0; i < noise.size(); i++)
+                noise[i] /= sum;
 
         return rollout(root);
     }
@@ -285,6 +286,7 @@ public:
 
                 double p = (x == root) ? mcts[x].Ps[i] * (1 - epsilon) + noise[i] * epsilon : mcts[x].Ps[i];
                 double value = mcts[x].Qsa[i] + cpuct * p * sqrt(mcts[x].Ns + eps) / (1 + mcts[x].Nsa[i]);
+
                 if (value > cur_best)
                 {
                     cur_best = value;
