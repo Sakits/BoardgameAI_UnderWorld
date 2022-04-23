@@ -8,24 +8,24 @@ from libcpp import Game
 
 args = dotdict({
     'run_name': 'game_data',
-    'workers': 8,
+    'workers': 4,
     'start_iter': 1,
     'num_iters': 1000,
     'process_batch_size': 128,
     'train_batch_size': 512,
     'train_steps_per_iteration': 1000,
     # Training Net may be slow if the value of max_sample_num is too small
-    'max_sample_num': 30000, 
+    'max_sample_num': 20000, 
     # should be large enough
     'max_games_per_iteration': 100000,
-    'num_iters_for_train_examples_history': 50,
+    'num_iters_for_train_examples_history': 25,
     'symmetric_samples': False,
     # Dirichlet noise (should be small when num_MCTS_sims is small)
-    'epsilon' : 0.05,
+    'epsilon' : 0.15,
     # should be larger than action size to get a better result
-    'num_MCTS_sims': 100,
-    'num_fast_sims': 10,
-    'prob_fast_sim': 0.75,
+    'num_MCTS_sims': 200,
+    'num_fast_sims': 50,
+    'prob_fast_sim': 0,
     'temp_threshold': 10,
     'temp': 1,
     'compare_with_random': True,
@@ -35,8 +35,8 @@ args = dotdict({
     'arena_MCTS': False,
     'random_compare_freq': 5,
     'compare_with_past': True,
-    'past_compare_freq': 1,
-    'cpuct': 3,
+    'past_compare_freq': 3,
+    'cpuct': 1,
     'checkpoint': 'checkpoint',
     'data': 'data',
 })

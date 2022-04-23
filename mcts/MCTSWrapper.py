@@ -21,5 +21,5 @@ class MCTSWrapper():
         self.mcts.processResult(pi, value)
 
     def findLeafToProcess(self, canonicalBoard, isRoot):
-        flag, ans = self.mcts.findLeafToProcess(canonicalBoard, np.random.dirichlet([0.1 / self.action] * self.action))
+        flag, ans = self.mcts.findLeafToProcess(canonicalBoard, np.random.dirichlet([10 / self.action] * self.action))
         return ans if flag else None

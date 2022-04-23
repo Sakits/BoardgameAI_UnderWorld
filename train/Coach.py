@@ -114,6 +114,9 @@ class Coach:
             if self.file_queue.qsize() > self.args.max_sample_num:
                 lock = self.games_played.get_lock()
                 lock.acquire()
+                if self.games_played.value < self.args.max_games_per_iteration:
+                    print("")
+                    print(self.games_played.value, 'games played')
                 self.games_played.value = self.args.max_games_per_iteration
                 lock.release()
 
