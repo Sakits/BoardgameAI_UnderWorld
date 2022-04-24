@@ -13,19 +13,19 @@ args = dotdict({
     'num_iters': 1000,
     'process_batch_size': 128,
     'train_batch_size': 512,
-    'train_steps_per_iteration': 1000,
+    'train_steps_per_iteration': 500,
     # Training Net may be slow if the value of max_sample_num is too small
-    'max_sample_num': 20000, 
+    'max_sample_num': 10000, 
     # should be large enough
     'max_games_per_iteration': 100000,
     'num_iters_for_train_examples_history': 25,
     'symmetric_samples': False,
     # Dirichlet noise (should be small when num_MCTS_sims is small)
-    'epsilon' : 0.15,
+    'epsilon' : 0.2,
     # should be larger than action size to get a better result
     'num_MCTS_sims': 200,
     'num_fast_sims': 50,
-    'prob_fast_sim': 0,
+    'prob_fast_sim': 0.75,
     'temp_threshold': 10,
     'temp': 1,
     'compare_with_random': True,
@@ -33,7 +33,7 @@ args = dotdict({
     'arena_compare': 500,
     'arena_temp': 1,
     'arena_MCTS': False,
-    'random_compare_freq': 5,
+    'random_compare_freq': 3,
     'compare_with_past': True,
     'past_compare_freq': 3,
     'cpuct': 1,
