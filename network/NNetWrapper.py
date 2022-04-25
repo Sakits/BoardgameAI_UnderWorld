@@ -153,7 +153,7 @@ class NNetWrapper():
 
         if args.change_learning_rate :
             self.optimizer = optim.Adam(
-                self.nnet.parameters(), lr=self.args, betas=(0.9, 0.999), weight_decay= 1e-4, eps = 1e-8)
+                self.nnet.parameters(), lr=args.lr, betas=(0.9, 0.999), weight_decay= 1e-4, eps = 1e-8)
             self.scheduler = optim.lr_scheduler.ReduceLROnPlateau(
                 self.optimizer, min_lr = 0.00001, cooldown=10)
             print('Learning rate has been changed to', args.lr)
