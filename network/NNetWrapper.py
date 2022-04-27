@@ -25,9 +25,9 @@ class NNetWrapper():
         self.feat_cnt, self.board_x, self.board_y = game.getFeatureSize()
         self.action_size = game.getActionSize()
         self.optimizer = optim.Adam(
-            self.nnet.parameters(), lr=args.lr, betas=(0.9, 0.999), weight_decay= 1e-4, eps = 1e-8)
+                self.nnet.parameters(), lr=args.lr, betas=(0.9, 0.999), weight_decay= 1e-4, eps = 1e-8)
         self.scheduler = optim.lr_scheduler.ReduceLROnPlateau(
-            self.optimizer, min_lr = 0.00001, cooldown=10)
+            self.optimizer, min_lr = 0.0001, cooldown=10, patience=20)
 
         if args.cuda:
             self.nnet.cuda()
@@ -155,7 +155,7 @@ class NNetWrapper():
             self.optimizer = optim.Adam(
                 self.nnet.parameters(), lr=args.lr, betas=(0.9, 0.999), weight_decay= 1e-4, eps = 1e-8)
             self.scheduler = optim.lr_scheduler.ReduceLROnPlateau(
-                self.optimizer, min_lr = 0.00001, cooldown=10)
+                self.optimizer, min_lr = 0.0001, cooldown=10, patience=20)
             print('Learning rate has been changed to', args.lr)
             args.change_learning_rate = False
 

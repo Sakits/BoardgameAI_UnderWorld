@@ -27,6 +27,8 @@ void Game::init()
         for (int i = 0; i < n; i++)
             feat[k][i].resize(n);
     }
+
+    now_player = 1;
 }
 
 int Game::getActionSize()
