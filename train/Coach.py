@@ -209,7 +209,8 @@ class Coach:
         dataloader = DataLoader(dataset, batch_size=self.args.train_batch_size, shuffle=True,
                                 num_workers=self.args.workers, pin_memory=True)
 
-        train_steps = self.args.train_steps_per_iteration
+        train_steps = min(self.args.train_steps_per_iteration, 
+            2 * (iteration + 1 - max(1, iteration - currentHistorySize)) * self.args.max_sample_num // self.args.train_batch_size)
         l_pi, l_v = self.nnet.train(dataloader, train_steps)
         self.writer.add_scalar('loss/policy', l_pi, iteration)
         self.writer.add_scalar('loss/value', l_v, iteration)
