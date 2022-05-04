@@ -13,6 +13,8 @@ namespace py = pybind11;
 const double eps = 1e-6;
 using uint = unsigned int;
 
+// #define debug
+
 class MCTS
 {
 public:
@@ -73,7 +75,7 @@ public:
         mcts.push_back(node(game));
     }
 
-    py::array_t<double> return_probs(int temp, bool arena = false)
+    py::array_t<double> return_probs(double temp, bool arena = false)
     {
         int siz = game.getActionSize();
         int mx = 0, mxpos = 0;
@@ -84,7 +86,7 @@ public:
                 mxpos = i;
             }
 
-        if (!temp)
+        if (temp < eps)
         {
             for (int i = 0; i < siz; i++)
                 probs[i] = 0;
@@ -92,12 +94,12 @@ public:
         }
         else
         {
-            int sum = 0;
+            double sum = 0;
             for (int i = 0; i < siz; i++)
-                sum += counts[i];
+                probs[i] = pow(counts[i], 1.0 / temp), sum += probs[i];
             
             for (int i = 0; i < siz; i++)
-                probs[i] = 1.0 * counts[i] / sum;
+                probs[i] /= sum;
         }
 
         if (arena)
@@ -142,13 +144,30 @@ public:
         }
     }
 
-    py::array_t<double> getActionProb(py::array_t<char> canonicalBoard, int temp = 1)
+    py::array_t<double> getActionProb(py::array_t<char> canonicalBoard, double temp = 1)
     {
         find_root(canonicalBoard);
         int x = root;
 
         for (int i = 0; i < num_MCTS_sims; i++)
             search(x);
+
+        #ifdef debug
+        for (int i = 0; i < 9; i++)
+        {
+            for (int j = 0; j < 9; j++)
+                printf("%.3lf ", mcts[x].Ps[i * 9 + j]);
+            puts("");
+        }
+
+        for (int i = 0; i < 9; i++)
+        {
+            for (int j = 0; j < 9; j++)
+                printf("%4d ", mcts[x].Nsa[i * 9 + j]);
+            puts("");
+        }
+        printf("x:%d size:%d\n", x, mcts.size());
+        #endif
 
         int siz = mcts[x].game.getActionSize();
         for (int i = 0; i < siz; i++)
@@ -157,7 +176,7 @@ public:
         return return_probs(temp, true);
     }
 
-    py::array_t<double> getExpertProb(py::array_t<char> canonicalBoard, int temp = 1, bool prune = false)
+    py::array_t<double> getExpertProb(py::array_t<char> canonicalBoard, double temp = 1, bool prune = false)
     {
         find_root(canonicalBoard);
         int x = root;
@@ -195,6 +214,23 @@ public:
             }
         }
 
+        #ifdef debug
+        for (int i = 0; i < 9; i++)
+        {
+            for (int j = 0; j < 9; j++)
+                printf("%.3lf ", mcts[x].Ps[i * 9 + j]);
+            puts("");
+        }
+
+        for (int i = 0; i < 9; i++)
+        {
+            for (int j = 0; j < 9; j++)
+                printf("%4d ", mcts[x].Nsa[i * 9 + j]);
+            puts("");
+        }
+        printf("x:%d size:%d\n", x, mcts.size());
+        #endif
+
         return return_probs(temp);
     }
 
@@ -214,10 +250,36 @@ public:
             {
                 for (uint i = 0; i < mcts[x].Ps.size(); i++)
                     mcts[x].Ps[i] /= sum;
+                    
             }
             else
             {
                 puts("All valid moves were masked, do workaround");
+                for (uint i = 0; i < mcts[x].Ps.size(); i++)
+                    mcts[x].Ps[i] = mcts[x].game.valids[i], sum += 1;
+
+                for (uint i = 0; i < mcts[x].Ps.size(); i++)
+                    mcts[x].Ps[i] /= sum;
+                for (int i = 0; i < 9; i++)
+                {
+                    for (int j = 0; j < 9; j++)
+                        printf("%.3lf ", ptr[i * 9 + j]);
+                    puts("");
+                }
+
+                for (int i = 0; i < 9; i++)
+                {
+                    for (int j = 0; j < 9; j++)
+                        printf("%d ", mcts[x].game.valids[i * 9 + j]);
+                    puts("");
+                }
+
+                for (int i = 0; i < 9; i++)
+                {
+                    for (int j = 0; j < 9; j++)
+                        printf("%.3lf ", mcts[x].Ps[i * 9 + j]);
+                    puts("");
+                }
                 exit(1);
             }
 
@@ -246,9 +308,8 @@ public:
         double sum = 0;
         for (uint i = 0; i < noise.size(); i++)
             noise[i] = ptr[i] * mcts[root].game.valids[i], sum += noise[i];
-        if (sum > eps)
-            for (uint i = 0; i < noise.size(); i++)
-                noise[i] /= sum;
+        for (uint i = 0; i < noise.size(); i++)
+            noise[i] /= sum;
 
         return rollout(root);
     }
@@ -286,7 +347,6 @@ public:
 
                 double p = (x == root) ? mcts[x].Ps[i] * (1 - epsilon) + noise[i] * epsilon : mcts[x].Ps[i];
                 double value = mcts[x].Qsa[i] + cpuct * p * sqrt(mcts[x].Ns + eps) / (1 + mcts[x].Nsa[i]);
-
                 if (value > cur_best)
                 {
                     cur_best = value;

@@ -73,7 +73,10 @@ class SelfPlayAgent(mp.Process):
 
     def playMoves(self):
         for i in range(self.batch_size):
-            temp = int(self.turn[i] < self.args.temp_threshold)
+            temp = int(self.turn[i] < self.args.temp_threshold and np.random.rand() > 0.5)
+            if temp != 0:
+                decay = (self.args.temp - 0.2) / self.args.temp_threshold
+                temp = temp - decay * self.turn[i]
             policy = self.mcts[i].getExpertProb(
                 self.canonical[i], temp, not self.fast)
             action = np.random.choice(len(policy), p=policy)
