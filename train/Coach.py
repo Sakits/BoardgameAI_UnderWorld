@@ -186,6 +186,8 @@ class Coach:
             else:
                 draws += 1
 
+        print("p1_wins:", p1wins, " p2_wins:", p2wins, " draws:", draws)
+
         self.writer.add_scalar('win_rate/p1 vs p2',
                                (p1wins+0.5*draws)/num_games, iteration)
         self.writer.add_scalar('win_rate/draw', draws/num_games, iteration)

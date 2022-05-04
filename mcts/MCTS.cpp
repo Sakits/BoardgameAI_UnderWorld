@@ -347,7 +347,7 @@ public:
 
                 double p = (x == root) ? mcts[x].Ps[i] * (1 - epsilon) + noise[i] * epsilon : mcts[x].Ps[i];
                 double value = mcts[x].Qsa[i] + cpuct * p * sqrt(mcts[x].Ns + eps) / (1 + mcts[x].Nsa[i]);
-                if (value > cur_best)
+                if (value > cur_best || (fabs(value - cur_best) < eps && rand() & 1))
                 {
                     cur_best = value;
                     best_act = i;
@@ -405,7 +405,7 @@ public:
             {
                 double value = mcts[x].Qsa[i] + cpuct * mcts[x].Ps[i] * sqrt(mcts[x].Ns + eps) / (1 + mcts[x].Nsa[i]);
 
-                if (value > cur_best)
+                if (value > cur_best || (fabs(value - cur_best) < eps && rand() & 1))
                 {
                     cur_best = value;
                     best_act = i;

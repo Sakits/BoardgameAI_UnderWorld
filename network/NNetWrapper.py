@@ -12,7 +12,7 @@ sys.path.append('../../')
 from network.NNetArchitecture import NNetArchitecture as nnetarch
 
 args = dotdict({
-    'lr': 0.01,
+    'lr': 0.003,
     'cuda': torch.cuda.is_available(),
     'num_channels': 128,
     'depth': 5,
@@ -27,7 +27,7 @@ class NNetWrapper():
         self.optimizer = optim.Adam(
                 self.nnet.parameters(), lr=args.lr, betas=(0.9, 0.999), weight_decay= 1e-4, eps = 1e-8)
         self.scheduler = optim.lr_scheduler.ReduceLROnPlateau(
-            self.optimizer, min_lr = 0.0001, cooldown=10, patience=20)
+            self.optimizer, min_lr = 0.0001, cooldown=30, patience=20)
 
         if args.cuda:
             self.nnet.cuda()
@@ -155,7 +155,7 @@ class NNetWrapper():
             self.optimizer = optim.Adam(
                 self.nnet.parameters(), lr=args.lr, betas=(0.9, 0.999), weight_decay= 1e-4, eps = 1e-8)
             self.scheduler = optim.lr_scheduler.ReduceLROnPlateau(
-                self.optimizer, min_lr = 0.0001, cooldown=10, patience=20)
+                self.optimizer, min_lr = 0.0001, cooldown=30, patience=20)
             print('Learning rate has been changed to', args.lr)
             args.change_learning_rate = False
 
