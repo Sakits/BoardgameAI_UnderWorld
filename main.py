@@ -31,7 +31,7 @@ args = dotdict({
     'compare_with_random': True,
     'arena_compare_random': 500,
     'arena_compare': 100,
-    'arena_temp': 1,
+    'arena_temp': 0.1,
     'arena_MCTS': False,
     'random_compare_freq': 1,
     'compare_with_past': True,
