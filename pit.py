@@ -23,7 +23,7 @@ if __name__ == '__main__':
     # nnet players
     n1 = NNet(g)
     n1.load_checkpoint('./checkpoint/', 'iteration-0000.pkl')
-    args1 = dotdict({'num_MCTS_sims': 500, 'cpuct': 1.0})
+    args1 = dotdict({'num_MCTS_sims': 500, 'cpuct': 1.0, 'epsilon': 0.25})
     mcts1 = MCTS(g, n1, args1)
 
     def n1p(x, turn):
@@ -36,7 +36,7 @@ if __name__ == '__main__':
 
     n2 = NNet(g)
     n2.load_checkpoint('./checkpoint/', 'iteration-0000.pkl')
-    args2 = dotdict({'num_MCTS_sims': 500, 'cpuct': 1.0})
+    args2 = dotdict({'num_MCTS_sims': 500, 'cpuct': 1.0, 'epsilon': 0.25})
     mcts2 = MCTS(g, n2, args2)
 
     def n2p(x, turn):

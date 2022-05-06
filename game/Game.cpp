@@ -110,7 +110,7 @@ std::string Game::string_representation()
     std::string s = "";
     for (int i = 0; i < n; i++)
         for (int j = 0; j < n; j++)
-            s += board[i][j] == 1 ? "w" : (board[i][j] == -1 ? "b" : " ");
+            s += board[i][j] == 1 ? "b" : (board[i][j] == -1 ? "w" : " ");
 
     return s;
 }
@@ -127,7 +127,7 @@ void Game::display(py::array_t<char> pyboard)
     {
         printf("%d |", i);
         for (int j = 0; j < n; j++)
-            printf("%s ", board[i][j] == 1 ? "w" : (board[i][j] == -1 ? "b" : " "));
+            printf("%s ", board[i][j] == 1 ? "b" : (board[i][j] == -1 ? "w" : " "));
         puts("|");
     }
     puts(" -----------------------");
