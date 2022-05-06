@@ -13,7 +13,7 @@ def conv_1x1_bn(in_channels, out_channels, norm=True):
         return nn.Sequential(
             nn.Conv2d(in_channels, out_channels, 1, 1, 0, bias=False),
             nn.BatchNorm2d(out_channels),
-            nn.SiLU()
+            nn.GELU()
             )
     else:
         return nn.Conv2d(in_channels, out_channels, 1, 1, 0, bias=False)
@@ -26,7 +26,7 @@ def conv_3x3_bn(in_channels, out_channels, stride=1):
     return nn.Sequential(
         nn.Conv2d(in_channels, out_channels, 3, stride, 1, bias=False),
         nn.BatchNorm2d(out_channels),
-        nn.SiLU()
+        nn.GELU()
     )
 
 def conv_5x5_bn(in_channels, out_channels, stride=1):
@@ -36,7 +36,17 @@ def conv_5x5_bn(in_channels, out_channels, stride=1):
     return nn.Sequential(
         nn.Conv2d(in_channels, out_channels, 5, stride, 2, bias=False),
         nn.BatchNorm2d(out_channels),
-        nn.SiLU()
+        nn.GELU()
+    )
+
+def conv_7x7_bn(in_channels, out_channels, stride=1):
+    """
+        7x7 Convolution Block
+    """
+    return nn.Sequential(
+        nn.Conv2d(in_channels, out_channels, 7, stride, 3, bias=False),
+        nn.BatchNorm2d(out_channels),
+        nn.GELU()
     )
 
 class InvertedResidual(nn.Module):
@@ -54,9 +64,9 @@ class InvertedResidual(nn.Module):
         if exp_ratio == 1:
             self.conv = nn.Sequential(
                 # dw
-                nn.Conv2d(hidden_dim, hidden_dim, 3, stride, 1, groups=hidden_dim, bias=False),
+                nn.Conv2d(hidden_dim, hidden_dim, 7, stride, 3, groups=hidden_dim, bias=False),
                 nn.BatchNorm2d(hidden_dim),
-                nn.SiLU(),
+                nn.GELU(),
                 # pw-linear
                 nn.Conv2d(hidden_dim, out_channels, 1, 1, 0, bias=False),
                 nn.BatchNorm2d(out_channels),
@@ -66,11 +76,11 @@ class InvertedResidual(nn.Module):
                 # pw
                 nn.Conv2d(in_channels, hidden_dim, 1, 1, 0, bias=False),
                 nn.BatchNorm2d(hidden_dim),
-                nn.SiLU(),
+                nn.GELU(),
                 # dw
-                nn.Conv2d(hidden_dim, hidden_dim, 3, stride, 1, groups=hidden_dim, bias=False),
+                nn.Conv2d(hidden_dim, hidden_dim, 7, stride, 3, groups=hidden_dim, bias=False),
                 nn.BatchNorm2d(hidden_dim),
-                nn.SiLU(),
+                nn.GELU(),
                 # pw-linear
                 nn.Conv2d(hidden_dim, out_channels, 1, 1, 0, bias=False),
                 nn.BatchNorm2d(out_channels),
@@ -90,7 +100,7 @@ class NNetArchitecture(nn.Module):
         self.action_size = game.getActionSize()
         self.args = args
 
-        self.conv = conv_5x5_bn(self.feat_cnt, args.num_channels)
+        self.conv = conv_7x7_bn(self.feat_cnt, args.num_channels)
 
         self.res_layers = []
         for _ in range(args.depth):
