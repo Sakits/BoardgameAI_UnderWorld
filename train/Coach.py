@@ -224,7 +224,7 @@ class Coach:
         del datasets
 
     def compareToPast(self, iteration):
-        past = max(0, iteration-self.args.past_compare_freq)
+        past = max(0, iteration-50)
         self.pnet.load_checkpoint(folder=self.args.checkpoint,
                                   filename=f'iteration-{past:04d}.pkl')
         print(f'PITTING AGAINST ITERATION {past}')
