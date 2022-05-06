@@ -13,7 +13,7 @@ def conv_1x1_bn(in_channels, out_channels, norm=True):
         return nn.Sequential(
             nn.Conv2d(in_channels, out_channels, 1, 1, 0, bias=False),
             nn.BatchNorm2d(out_channels),
-            nn.GELU()
+            nn.SiLU()
             )
     else:
         return nn.Conv2d(in_channels, out_channels, 1, 1, 0, bias=False)
@@ -26,7 +26,7 @@ def conv_3x3_bn(in_channels, out_channels, stride=1):
     return nn.Sequential(
         nn.Conv2d(in_channels, out_channels, 3, stride, 1, bias=False),
         nn.BatchNorm2d(out_channels),
-        nn.GELU()
+        nn.SiLU()
     )
 
 def conv_5x5_bn(in_channels, out_channels, stride=1):
@@ -36,52 +36,51 @@ def conv_5x5_bn(in_channels, out_channels, stride=1):
     return nn.Sequential(
         nn.Conv2d(in_channels, out_channels, 5, stride, 2, bias=False),
         nn.BatchNorm2d(out_channels),
-        nn.GELU()
+        nn.SiLU()
     )
 
-def conv_7x7_bn(in_channels, out_channels, stride=1):
+class InvertedResidual(nn.Module):
     """
-        7x7 Convolution Block
+        Inverted Residual Block (MobileNetv2)
     """
-    return nn.Sequential(
-        nn.Conv2d(in_channels, out_channels, 7, stride, 3, bias=False),
-        nn.BatchNorm2d(out_channels),
-        nn.GELU()
-    )
+    def __init__(self, in_channels, out_channels, stride=1, exp_ratio=4):
+        super(InvertedResidual, self).__init__()
+        assert stride in [1, 2]
+        
+        self.stride = stride
+        hidden_dim = int(in_channels * exp_ratio)
+        self.use_res_connect = self.stride == 1 and in_channels == out_channels
 
-class LayerNorm(nn.Module):
-    def __init__(self, normalized_shape, eps=1e-6):
-        super().__init__()
-        self.weight = nn.Parameter(torch.ones(normalized_shape))
-        self.bias = nn.Parameter(torch.zeros(normalized_shape))
-        self.eps = eps
-        self.normalized_shape = (normalized_shape, )
-    
+        if exp_ratio == 1:
+            self.conv = nn.Sequential(
+                # dw
+                nn.Conv2d(hidden_dim, hidden_dim, 3, stride, 1, groups=hidden_dim, bias=False),
+                nn.BatchNorm2d(hidden_dim),
+                nn.SiLU(),
+                # pw-linear
+                nn.Conv2d(hidden_dim, out_channels, 1, 1, 0, bias=False),
+                nn.BatchNorm2d(out_channels),
+            )
+        else:
+            self.conv = nn.Sequential(
+                # pw
+                nn.Conv2d(in_channels, hidden_dim, 1, 1, 0, bias=False),
+                nn.BatchNorm2d(hidden_dim),
+                nn.SiLU(),
+                # dw
+                nn.Conv2d(hidden_dim, hidden_dim, 3, stride, 1, groups=hidden_dim, bias=False),
+                nn.BatchNorm2d(hidden_dim),
+                nn.SiLU(),
+                # pw-linear
+                nn.Conv2d(hidden_dim, out_channels, 1, 1, 0, bias=False),
+                nn.BatchNorm2d(out_channels),
+            )
+
     def forward(self, x):
-        return F.layer_norm(x, self.normalized_shape, self.weight, self.bias, self.eps)
-
-class ConvNeXtBlock(nn.Module):
-    def __init__(self, dim, exp_ratio=4):
-        super(ConvNeXtBlock, self).__init__()
-
-        self.dwconv = nn.Conv2d(dim, dim, kernel_size=7, padding=3, groups=dim)
-        self.norm = LayerNorm(dim, eps=1e-6)
-        self.pwconv1 = nn.Linear(dim, dim * exp_ratio)
-        self.act = nn.GELU()
-        self.pwconv2 = nn.Linear(dim * exp_ratio, dim)
-        self.gamma = nn.Parameter(1e-6 * torch.ones(dim), requires_grad=True)
-
-    def forward(self, x):
-        residual = x
-        x = self.dwconv(x)
-        x = x.permute(0, 2, 3, 1)
-        x = self.norm(x)
-        x = self.pwconv1(x)
-        x = self.act(x)
-        x = self.pwconv2(x)
-        x = self.gamma * x
-        x = x.permute(0, 3, 1, 2)
-        return residual + x
+        if self.use_res_connect:
+            return x + self.conv(x)
+        else:
+            return self.conv(x)
 
 class NNetArchitecture(nn.Module):
     def __init__(self, game, args):
@@ -91,12 +90,12 @@ class NNetArchitecture(nn.Module):
         self.action_size = game.getActionSize()
         self.args = args
 
-        self.conv = conv_7x7_bn(self.feat_cnt, args.num_channels)
+        self.conv = conv_5x5_bn(self.feat_cnt, args.num_channels)
 
-        self.layers = []
+        self.res_layers = []
         for _ in range(args.depth):
-            self.layers.append(ConvNeXtBlock(args.num_channels, 4))
-        self.ConvNeXt = nn.Sequential(*self.layers)
+            self.res_layers.append(InvertedResidual(args.num_channels, args.num_channels, 1, 4))
+        self.resnet = nn.Sequential(*self.res_layers)
 
         self.v_conv = conv_1x1_bn(args.num_channels, 1)
         self.v_fc1 = nn.Linear(self.board_x * self.board_y,
@@ -107,9 +106,10 @@ class NNetArchitecture(nn.Module):
         self.pi_fc = nn.Linear(self.board_x * self.board_y * 2, self.action_size)
 
     def forward(self, s):
+        
         s = s.view(-1, self.feat_cnt, self.board_x, self.board_y)   # batch_size x feat_cnt x board_x x board_y
         s = self.conv(s)                                            # batch_size x num_channels x board_x x board_y
-        s = self.ConvNeXt(s)                                          # batch_size x num_channels x board_x x board_y
+        s = self.resnet(s)                                          # batch_size x num_channels x board_x x board_y
 
         v = self.v_conv(s)
         v = torch.flatten(v, 1)
