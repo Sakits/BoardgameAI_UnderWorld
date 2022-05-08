@@ -39,6 +39,16 @@ def conv_5x5_bn(in_channels, out_channels, stride=1):
         nn.SiLU()
     )
 
+def conv_7x7_bn(in_channels, out_channels, stride=1):
+    """
+        7x7 Convolution Block
+    """
+    return nn.Sequential(
+        nn.Conv2d(in_channels, out_channels, 7, stride, 3, bias=False),
+        nn.BatchNorm2d(out_channels),
+        nn.SiLU()
+    )
+
 class InvertedResidual(nn.Module):
     """
         Inverted Residual Block (MobileNetv2)
@@ -54,7 +64,7 @@ class InvertedResidual(nn.Module):
         if exp_ratio == 1:
             self.conv = nn.Sequential(
                 # dw
-                nn.Conv2d(hidden_dim, hidden_dim, 3, stride, 1, groups=hidden_dim, bias=False),
+                nn.Conv2d(hidden_dim, hidden_dim, 7, stride, 3, groups=hidden_dim, bias=False),
                 nn.BatchNorm2d(hidden_dim),
                 nn.SiLU(),
                 # pw-linear
@@ -68,7 +78,7 @@ class InvertedResidual(nn.Module):
                 nn.BatchNorm2d(hidden_dim),
                 nn.SiLU(),
                 # dw
-                nn.Conv2d(hidden_dim, hidden_dim, 3, stride, 1, groups=hidden_dim, bias=False),
+                nn.Conv2d(hidden_dim, hidden_dim, 7, stride, 3, groups=hidden_dim, bias=False),
                 nn.BatchNorm2d(hidden_dim),
                 nn.SiLU(),
                 # pw-linear
@@ -90,7 +100,7 @@ class NNetArchitecture(nn.Module):
         self.action_size = game.getActionSize()
         self.args = args
 
-        self.conv = conv_5x5_bn(self.feat_cnt, args.num_channels)
+        self.conv = conv_7x7_bn(self.feat_cnt, args.num_channels)
 
         self.res_layers = []
         for _ in range(args.depth):
@@ -106,7 +116,6 @@ class NNetArchitecture(nn.Module):
         self.pi_fc = nn.Linear(self.board_x * self.board_y * 2, self.action_size)
 
     def forward(self, s):
-        
         s = s.view(-1, self.feat_cnt, self.board_x, self.board_y)   # batch_size x feat_cnt x board_x x board_y
         s = self.conv(s)                                            # batch_size x num_channels x board_x x board_y
         s = self.resnet(s)                                          # batch_size x num_channels x board_x x board_y
