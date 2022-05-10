@@ -75,17 +75,36 @@ public:
         mcts.push_back(node(game));
     }
 
-    py::array_t<double> return_probs(double temp, bool arena = false)
+    int get_mxpos(int x)
     {
         int siz = game.getActionSize();
-        int mx = 0, mxpos = 0;
+        double mxv = -1e9;
+        int mxcnt = 0, mxpos = 0;
+        
         for (int i = 0; i < siz; i++)
-            if (counts[i] > mx)
+            if (counts[i] > mxcnt)
             {
-                mx = counts[i];
+                mxcnt = counts[i];
+                mxv = mcts[x].Qsa[i];
                 mxpos = i;
             }
+            else if (counts[i] == mxcnt)
+            {
+                double v = mcts[x].Qsa[i];
+                if (v > mxv)
+                {
+                    mxv = v;
+                    mxpos = i;
+                }
+            }
 
+        return mxpos;
+    }
+
+    py::array_t<double> return_probs(double temp, int mxpos, bool arena = false)
+    {
+        int siz = game.getActionSize();
+        
         if (temp < eps)
         {
             for (int i = 0; i < siz; i++)
@@ -173,7 +192,7 @@ public:
         for (int i = 0; i < siz; i++)
             counts[i] = mcts[x].son[i] ? mcts[x].Nsa[i] : 0;
 
-        return return_probs(temp, true);
+        return return_probs(temp, get_mxpos(x), true);
     }
 
     py::array_t<double> getExpertProb(py::array_t<char> canonicalBoard, double temp = 1, bool prune = false)
@@ -185,16 +204,9 @@ public:
         for (int i = 0; i < siz; i++)
             counts[i] = mcts[x].son[i] ? mcts[x].Nsa[i] : 0;
 
+        int mxpos = get_mxpos(x);
         if (prune)
         {
-            int mx = 0, mxpos = 0;
-            for (int i = 0; i < siz; i++)
-                if (counts[i] > mx)
-                {
-                    mx = counts[i];
-                    mxpos = i;
-                }
-
             double mxv = mcts[x].Qsa[mxpos] + cpuct * mcts[x].Ps[mxpos] * sqrt(mcts[x].Ns) / (counts[mxpos] + 1);
 
             for (int i = 0; i < siz; i++)
@@ -231,7 +243,7 @@ public:
         printf("x:%d size:%d\n", x, mcts.size());
         #endif
 
-        return return_probs(temp);
+        return return_probs(temp, mxpos);
     }
 
     void processResult(py::array_t<double> pi, double value)
@@ -347,7 +359,7 @@ public:
 
                 double p = (x == root) ? mcts[x].Ps[i] * (1 - epsilon) + noise[i] * epsilon : mcts[x].Ps[i];
                 double value = mcts[x].Qsa[i] + cpuct * p * sqrt(mcts[x].Ns + eps) / (1 + mcts[x].Nsa[i]);
-                if (value > cur_best || (fabs(value - cur_best) < eps && (rand() & 1)))
+                if (value > cur_best)
                 {
                     cur_best = value;
                     best_act = i;
@@ -405,7 +417,7 @@ public:
             {
                 double value = mcts[x].Qsa[i] + cpuct * mcts[x].Ps[i] * sqrt(mcts[x].Ns + eps) / (1 + mcts[x].Nsa[i]);
 
-                if (value > cur_best || (fabs(value - cur_best) < eps && (rand() & 1)))
+                if (value > cur_best)
                 {
                     cur_best = value;
                     best_act = i;

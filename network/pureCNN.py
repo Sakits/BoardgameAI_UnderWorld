@@ -54,11 +54,11 @@ class NNetArchitecture(nn.Module):
     def __init__(self, game, args):
         super(NNetArchitecture, self).__init__()
         # game params
-        self.board_x, self.board_y = game.getBoardSize()
+        self.feat_cnt, self.board_x, self.board_y = game.getFeatureSize()
         self.action_size = game.getActionSize()
         self.args = args
 
-        self.conv1 = conv5x5(1, args.num_channels)
+        self.conv1 = conv5x5(self.feat_cnt, args.num_channels)
         self.bn1 = nn.BatchNorm2d(args.num_channels)
         
         self.res_layers = []
@@ -66,18 +66,6 @@ class NNetArchitecture(nn.Module):
             self.res_layers.append(ResidualBlock(
                 args.num_channels, args.num_channels))
         self.resnet = nn.Sequential(*self.res_layers)
-
-        self.res_layers1 = []
-        for _ in range(args.depth):
-            self.res_layers1.append(ResidualBlock(
-                args.num_channels, args.num_channels))
-        self.resnet1 = nn.Sequential(*self.res_layers1)
-
-        self.res_layers2 = []
-        for _ in range(args.depth):
-            self.res_layers2.append(ResidualBlock(
-                args.num_channels, args.num_channels))
-        self.resnet2 = nn.Sequential(*self.res_layers2)
 
         self.v_conv = conv1x1(args.num_channels, 1, bais = True)
         self.v_bn = nn.BatchNorm2d(1)
@@ -90,21 +78,20 @@ class NNetArchitecture(nn.Module):
         self.pi_fc1 = nn.Linear(self.board_x*self.board_y*2, self.action_size)
 
     def forward(self, s):
-        # batch_size x 1 x board_x x board_y
-        s = s.view(-1, 1, self.board_x, self.board_y)
+        # batch_size x feat_cnt x board_x x board_y
+        s = s.view(-1, self.feat_cnt, self.board_x, self.board_y)
         # batch_size x num_channels x board_x x board_y
         s = F.relu(self.bn1(self.conv1(s)))
         # batch_size x num_channels x board_x x board_y
         s = self.resnet(s)
-        v, pi = self.resnet1(s), self.resnet2(s)
 
-        v = self.v_conv(v)
+        v = self.v_conv(s)
         v = self.v_bn(v)
         v = torch.flatten(v, 1)
         v = self.v_fc1(v)
         v = self.v_fc2(v)
 
-        pi = self.pi_conv(pi)
+        pi = self.pi_conv(s)
         pi = self.pi_bn(pi)
         pi = torch.flatten(pi, 1)
         pi = self.pi_fc1(pi)
