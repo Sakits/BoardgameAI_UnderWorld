@@ -20,6 +20,7 @@ class MCTSWrapper():
     def processResults(self, pi, value):
         self.mcts.processResult(pi, value)
 
-    def findLeafToProcess(self, canonicalBoard, isRoot):
-        flag, ans = self.mcts.findLeafToProcess(canonicalBoard, np.random.dirichlet([10 / self.action] * self.action))
+    def findLeafToProcess(self, canonicalBoard, isRoot, isFast = False):
+        noise = (np.zeros(self.action) + (1 / self.action)) if isFast else np.random.dirichlet([10 / self.action] * self.action)
+        flag, ans = self.mcts.findLeafToProcess(canonicalBoard, noise)
         return ans if flag else None

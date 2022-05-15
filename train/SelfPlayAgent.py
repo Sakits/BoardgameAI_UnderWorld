@@ -59,7 +59,7 @@ class SelfPlayAgent(mp.Process):
 
     def generateBatch(self):
         for i in range(self.batch_size):
-            board = self.mcts[i].findLeafToProcess(self.canonical[i], True)
+            board = self.mcts[i].findLeafToProcess(self.canonical[i], True, isFast = self.fast)
             if board is not None:
                 self.batch_tensor[i] = torch.from_numpy(board)
         self.ready_queue.put(self.id)
@@ -75,7 +75,7 @@ class SelfPlayAgent(mp.Process):
         for i in range(self.batch_size):
             temp = int(self.turn[i] < self.args.temp_threshold and np.random.rand() > 0.5)
             if temp != 0:
-                decay = (self.args.temp - 0.2) / self.args.temp_threshold
+                decay = self.args.temp / self.args.temp_threshold
                 temp = temp - decay * self.turn[i]
             policy = self.mcts[i].getExpertProb(
                 self.canonical[i], temp, not self.fast)
@@ -85,6 +85,14 @@ class SelfPlayAgent(mp.Process):
                     self.mcts[i].getExpertProb(self.canonical[i], prune=True), self.player[i]))
             self.games[i], self.player[i] = self.game.getNextState(self.games[i], self.player[i], action)
             self.turn[i] += 1
+
+            # self.game.display(self.canonical[i])
+            # print(temp)
+            # for x in range(9):
+            #     for y in range(9):
+            #         print(policy[x * 9 + y], end = ' ')
+            #     print('\n')
+
             winner = self.game.getGameEnded(self.games[i], 1)
             if winner != 0:
                 self.result_queue.put(winner)
