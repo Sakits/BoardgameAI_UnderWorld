@@ -56,7 +56,16 @@ void Game::get_valid_moves()
     for (int i = 0; i < n; i++)
         for (int j = 0; j < n; j++)
             valids[i * n + j] = !board[i][j], cnt += !board[i][j];
+
     valids[n * n] = !cnt;
+
+    if (cnt == n * n)
+    {
+        for (int i = 0; i < n; i++)
+            for (int j = 0; j < n; j++)
+                valids[i * n + j] = 0;
+        valids[(n / 2) * n + (n / 2)] = 1;
+    }
 }
 
 double Game::get_game_ended()
@@ -100,8 +109,8 @@ void Game::get_feature()
     for (int i = 0; i < n; i++)
         for (int j = 0; j < n; j++)
         {
-            feat[0][i][j] = board[i][j];
-            feat[1][i][j] = 1;
+            feat[0][i][j] = board[i][j] == 1;
+            feat[1][i][j] = board[i][j] == -1;
         }
 }
 
@@ -119,18 +128,19 @@ void Game::display(py::array_t<char> pyboard)
 {
     get_board(pyboard, 1);
 
+    printf("|||");
     for (int i = 0; i < n; i++)
-        printf("%d |", i);
+        printf(" %d|", i % 10);
     puts("");
-    puts(" -----------------------");
+    puts(" ------------------------------------------------");
     for (int i = 0; i < n; i++)
     {
-        printf("%d |", i);
+        printf("%2d|", i);
         for (int j = 0; j < n; j++)
-            printf("%s ", board[i][j] == 1 ? "b" : (board[i][j] == -1 ? "w" : " "));
+            printf("%s |", board[i][j] == 1 ? "b" : (board[i][j] == -1 ? "w" : " "));
         puts("|");
     }
-    puts(" -----------------------");
+    puts(" ------------------------------------------------");
 }
 
 /* -------------------------- py API --------------------------*/
@@ -233,5 +243,3 @@ std::string Game::stringRepresentation(py::array_t<char> pyboard)
     get_board(pyboard, 1);
     return string_representation();
 }
-
-
