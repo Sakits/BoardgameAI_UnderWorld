@@ -19,7 +19,7 @@ args = dotdict({
     # should be large enough
     'max_games_per_iteration': 100000,
     'num_iters_for_train_examples_history': 100,
-    'symmetric_samples': False,
+    'symmetric_samples': True,
     # Dirichlet noise (should be small when num_MCTS_sims is small)
     'epsilon' : 0.25,
     # should be larger than action size to get a better result

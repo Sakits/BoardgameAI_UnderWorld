@@ -81,8 +81,26 @@ class SelfPlayAgent(mp.Process):
                 self.canonical[i], self.turn[i], temp, not self.fast)
             action = np.random.choice(len(policy), p=policy)
             if not self.fast:
-                self.histories[i].append((self.game.getFeature(self.canonical[i]), 
-                    self.mcts[i].getExpertProb(self.canonical[i], self.turn[i], temp=1, prune=True), self.player[i]))
+                board = self.game.getFeature(self.canonical[i])
+                pi = self.mcts[i].getExpertProb(self.canonical[i], self.turn[i], temp=1, prune=True)
+
+                if self.args.symmetric_samples:
+                    pi_board = np.reshape(pi[:-1], (board.shape[1], board.shape[2]))
+        
+                    for x in range(1, 5):
+                        for y in [True, False]:
+                            newB = np.copy(board)
+                            newPi = np.copy(pi_board)
+                            newB = np.rot90(newB, x, (1, 2))
+                            newPi = np.rot90(newPi, x)
+                            if y:
+                                for k in range(newB.shape[0]):
+                                    newB[k] = np.fliplr(newB[k])
+                                newPi = np.fliplr(newPi)
+                            self.histories[i].append((newB, list(newPi.ravel()) + [pi[-1]], self.player[i]))
+
+                else:
+                    self.histories[i].append((board, pi, self.player[i]))
             self.games[i], self.player[i] = self.game.getNextState(self.games[i], self.player[i], action)
             self.turn[i] += 1
 
@@ -102,12 +120,7 @@ class SelfPlayAgent(mp.Process):
                     self.games_played.value += 1
                     lock.release()
                     for hist in self.histories[i]:
-                        if self.args.symmetric_samples:
-                            sym = self.game.getSymmetries(hist[0], hist[1])
-                            for b, p in sym:
-                                self.output_queue.put((b, p, winner * hist[2]))
-                        else:
-                            self.output_queue.put((hist[0], hist[1], winner * hist[2]))
+                        self.output_queue.put((hist[0], hist[1], winner * hist[2]))
                     self.games[i] = self.game.getInitBoard()
                     self.histories[i] = []
                     self.player[i] = 1
