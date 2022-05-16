@@ -30,7 +30,7 @@ public:
 
     void get_next_state(int action);
 
-    void get_valid_moves();
+    void get_valid_moves(int turn);
 
     double get_game_ended();
 
@@ -58,7 +58,7 @@ public:
 
     py::tuple getNextState(py::array_t<char> pyboard, int player, int action);
 
-    py::array_t<char> getValidMoves(py::array_t<char> pyboard, int player);
+    py::array_t<char> getValidMoves(py::array_t<char> pyboard, int player, int turn);
 
     double getGameEnded(py::array_t<char> pyboard, int player);
 

@@ -47,7 +47,7 @@ class Arena():
                              1](self.game.getCanonicalForm(board, curPlayer), it)
 
             valids = self.game.getValidMoves(
-                self.game.getCanonicalForm(board, curPlayer), 1)
+                self.game.getCanonicalForm(board, curPlayer), 1, it)
 
             if valids[action] == 0:
                 print()

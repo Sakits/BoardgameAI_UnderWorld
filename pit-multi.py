@@ -74,7 +74,7 @@ if __name__ == '__main__':
             if turn <= 2:
                 mcts1.reset()
             temp = args.temp if turn <= args.temp_threshold else args.arena_temp
-            policy = mcts1.getActionProb(x, temp=temp)
+            policy = mcts1.getActionProb(x, temp=temp, turn=turn)
             return np.random.choice(len(policy), p=policy)
     
     for i in range(model_count):
@@ -91,7 +91,7 @@ if __name__ == '__main__':
                 if turn <= 2:
                     mcts2.reset()
                 temp = args.temp if turn <= args.temp_threshold else args.arena_temp
-                policy = mcts2.getActionProb(x, temp=temp)
+                policy = mcts2.getActionProb(x, temp=temp, turn=turn)
                 return np.random.choice(len(policy), p=policy)
 
         arena = Arena(p1, p2, g)

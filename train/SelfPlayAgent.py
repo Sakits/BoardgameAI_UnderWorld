@@ -59,7 +59,7 @@ class SelfPlayAgent(mp.Process):
 
     def generateBatch(self):
         for i in range(self.batch_size):
-            board = self.mcts[i].findLeafToProcess(self.canonical[i], True, isFast = self.fast)
+            board = self.mcts[i].findLeafToProcess(self.canonical[i], self.turn[i], True, isFast = self.fast)
             if board is not None:
                 self.batch_tensor[i] = torch.from_numpy(board)
         self.ready_queue.put(self.id)
@@ -78,11 +78,11 @@ class SelfPlayAgent(mp.Process):
                 decay = self.args.temp / self.args.temp_threshold
                 temp = temp - decay * self.turn[i]
             policy = self.mcts[i].getExpertProb(
-                self.canonical[i], temp, not self.fast)
+                self.canonical[i], self.turn[i], temp, not self.fast)
             action = np.random.choice(len(policy), p=policy)
             if not self.fast:
                 self.histories[i].append((self.game.getFeature(self.canonical[i]), 
-                    self.mcts[i].getExpertProb(self.canonical[i], prune=True), self.player[i]))
+                    self.mcts[i].getExpertProb(self.canonical[i], self.turn[i], temp=1, prune=True), self.player[i]))
             self.games[i], self.player[i] = self.game.getNextState(self.games[i], self.player[i], action)
             self.turn[i] += 1
 

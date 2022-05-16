@@ -15,7 +15,7 @@ args = dotdict({
     'lr': 0.003,
     'cuda': torch.cuda.is_available(),
     'num_channels': 128,
-    'depth': 5,
+    'depth': 10,
     'change_learning_rate' : False, 
 })
 

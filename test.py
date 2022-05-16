@@ -13,7 +13,7 @@ any agent.
 """
 if __name__ == '__main__':
 
-    g = Game(15, 5)
+    g = Game(13, 5)
 
     n2 = NNet(g)
     n2.load_checkpoint('./checkpoint/', 'iteration-0014.pkl')
@@ -25,7 +25,7 @@ if __name__ == '__main__':
             mcts2.reset()
         temp = 0
         # temp = 1 if turn <= 10 else 0
-        policy = mcts2.getActionProb(x, temp=temp)
+        policy = mcts2.getActionProb(x, temp=temp, turn=turn)
         step = np.random.choice(len(policy), p=policy)
         print(step // 15, step % 15)
         return step

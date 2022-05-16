@@ -236,14 +236,14 @@ class Coach:
                 if turn <= 2:
                     pplayer.reset()
                 temp = self.args.temp if turn <= self.args.temp_threshold else self.args.arena_temp
-                policy = pplayer.getActionProb(x, temp=temp)
+                policy = pplayer.getActionProb(x, turn=turn, temp=temp)
                 return np.random.choice(len(policy), p=policy)
 
             def playnplayer(x, turn):
                 if turn <= 2:
                     nplayer.reset()
                 temp = self.args.temp if turn <= self.args.temp_threshold else self.args.arena_temp
-                policy = nplayer.getActionProb(x, temp=temp)
+                policy = nplayer.getActionProb(x, turn=turn, temp=temp)
                 return np.random.choice(len(policy), p=policy)
 
             arena = Arena(playnplayer, playpplayer, self.game)

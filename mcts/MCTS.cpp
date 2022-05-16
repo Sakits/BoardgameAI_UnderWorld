@@ -28,10 +28,10 @@ public:
         std::vector <double> Qsa, Ps;
         Game game;
 
-        node(const Game &_game):game(_game) 
+        node(const Game &_game, int turn):game(_game) 
         {
             Ns = 0;
-            game.get_valid_moves();
+            game.get_valid_moves(turn);
             Es = game.get_game_ended();
             Ps.clear();
 
@@ -72,7 +72,7 @@ public:
         probs.resize(game.getActionSize());
         counts.resize(game.getActionSize());
         noise.resize(game.getActionSize());
-        mcts.push_back(node(game));
+        mcts.push_back(node(game, 1));
     }
 
     int get_mxpos(int x)
@@ -136,7 +136,7 @@ public:
         return pyprobs;
     }
 
-    void find_root(py::array_t<char> canonicalBoard)
+    void find_root(py::array_t<char> canonicalBoard, int turn)
     {
         bool flag = 0;
         std::string s = game.stringRepresentation(canonicalBoard);
@@ -158,18 +158,18 @@ public:
         if (!flag)
         {
             game.get_board(canonicalBoard, 1);
-            mcts.push_back(node(game));
+            mcts.push_back(node(game, turn));
             root = mcts.size() - 1;
         }
     }
 
-    py::array_t<double> getActionProb(py::array_t<char> canonicalBoard, double temp = 1)
+    py::array_t<double> getActionProb(py::array_t<char> canonicalBoard, int turn, double temp = 1)
     {
-        find_root(canonicalBoard);
+        find_root(canonicalBoard, turn);
         int x = root;
 
         for (int i = 0; i < num_MCTS_sims; i++)
-            search(x);
+            search(x, turn);
 
         #ifdef debug
         for (int i = 0; i < 9; i++)
@@ -195,9 +195,9 @@ public:
         return return_probs(temp, get_mxpos(x), true);
     }
 
-    py::array_t<double> getExpertProb(py::array_t<char> canonicalBoard, double temp = 1, bool prune = false)
+    py::array_t<double> getExpertProb(py::array_t<char> canonicalBoard, int turn, double temp = 1, bool prune = false)
     {
-        find_root(canonicalBoard);
+        find_root(canonicalBoard, turn);
         int x = root;
 
         int siz = mcts[x].game.getActionSize();
@@ -312,9 +312,9 @@ public:
         path.clear();
     }
 
-    std::pair<bool, py::array_t<char>> findLeafToProcess(py::array_t<char> canonicalBoard, py::array_t<double> _noise)
+    std::pair<bool, py::array_t<char>> findLeafToProcess(py::array_t<char> canonicalBoard, py::array_t<double> _noise, int turn)
     {
-        find_root(canonicalBoard);
+        find_root(canonicalBoard, turn);
 
         double* ptr = static_cast<double *>(_noise.request().ptr);
         double sum = 0;
@@ -323,10 +323,10 @@ public:
         for (uint i = 0; i < noise.size(); i++)
             noise[i] /= sum;
 
-        return rollout(root);
+        return rollout(root, turn);
     }
 
-    std::pair<bool, py::array_t<char>> rollout(int x)
+    std::pair<bool, py::array_t<char>> rollout(int x, int turn)
     {
         if (fabs(mcts[x].Es) > eps)
         {
@@ -373,14 +373,14 @@ public:
             next_state.get_canonical_form();
 
             mcts[x].son[best_act] = mcts.size();
-            mcts.push_back(node(next_state));
+            mcts.push_back(node(next_state, turn + 1));
         }
         path.push_back(std::make_pair(x, best_act));
         
-        return rollout(mcts[x].son[best_act]);
+        return rollout(mcts[x].son[best_act], turn + 1);
     }
 
-    double search(int x)
+    double search(int x, int turn)
     {
         if (fabs(mcts[x].Es) > eps)
             return -mcts[x].Es;  
@@ -431,10 +431,10 @@ public:
             next_state.get_canonical_form();
 
             mcts[x].son[best_act] = mcts.size();
-            mcts.push_back(node(next_state));
+            mcts.push_back(node(next_state, turn + 1));
         }
 
-        double v = search(mcts[x].son[best_act]);
+        double v = search(mcts[x].son[best_act], turn + 1);
         
         int i = best_act;
         mcts[x].Qsa[i] = (mcts[x].Nsa[i] * mcts[x].Qsa[i] + v) / (mcts[x].Nsa[i] + 1);

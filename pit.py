@@ -13,12 +13,12 @@ any agent.
 """
 if __name__ == '__main__':
 
-    g = Game(9, 5)
+    g = Game(13, 5)
 
     # all players
     # rp = RandomPlayer(g).play
     # np = NNPlayer(g).play
-    # hp = HumanPlayer(g).play
+    hp = HumanPlayer(g).play
 
     # nnet players
     n1 = NNet(g)
@@ -29,9 +29,10 @@ if __name__ == '__main__':
     def n1p(x, turn):
         if turn <= 2:
             mcts1.reset()
-        temp = 0
-        # temp = 1 if turn <= 10 else 0
-        policy = mcts1.getActionProb(x, temp=temp)
+        # temp = 0
+        temp = 1 if turn <= 10 else 0
+        policy = mcts1.getActionProb(x, temp=temp, turn=turn)
+        print(policy)
         return np.random.choice(len(policy), p=policy)
 
     n2 = NNet(g)
@@ -44,8 +45,8 @@ if __name__ == '__main__':
             mcts2.reset()
         temp = 0
         # temp = 1 if turn <= 10 else 0
-        policy = mcts2.getActionProb(x, temp=temp)
+        policy = mcts2.getActionProb(x, temp=temp, turn=turn)
         return np.random.choice(len(policy), p=policy)
 
-    arena = Arena(n1p, n2p, g, display=g.display)
+    arena = Arena(hp, n1p, g, display=g.display)
     print(arena.playGames(2, verbose=True))

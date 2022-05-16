@@ -42,7 +42,7 @@ args = dotdict({
 })
 
 if __name__ == "__main__":
-    g = Game(9, 5)
+    g = Game(13, 5)
     nnet = nn(g)
     c = Coach(g, nnet, args)
     c.learn()

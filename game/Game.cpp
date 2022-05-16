@@ -53,14 +53,14 @@ void Game::get_next_state(int action)
     now_player = -now_player;
 }
 
-void Game::get_valid_moves()
+void Game::get_valid_moves(int turn)
 {
     int cnt = 0;
     for (int i = 0; i < n; i++)
         for (int j = 0; j < n; j++)
             valids[i * n + j] = !board[i][j], cnt += !board[i][j];
 
-    valids[n * n] = (cnt == n * n - 1) && (!valids[n * n]);
+    valids[n * n] = (turn == 2);
 }
 
 double Game::get_game_ended()
@@ -201,10 +201,10 @@ py::tuple Game::getNextState(py::array_t<char> pyboard, int player, int action)
     return py::make_tuple(return_board(), now_player);
 }
 
-py::array_t<char> Game::getValidMoves(py::array_t<char> pyboard, int player)
+py::array_t<char> Game::getValidMoves(py::array_t<char> pyboard, int player, int turn)
 {
     get_board(pyboard, player);
-    get_valid_moves();
+    get_valid_moves(turn);
     auto pyvalids = py::array_t<char>(getActionSize());
     char* ptr = static_cast<char *>(pyvalids.request().ptr);
 
