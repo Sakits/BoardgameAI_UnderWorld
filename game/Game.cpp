@@ -40,6 +40,9 @@ void Game::get_next_state(int action)
 {
     if (action == n * n)
     {
+        for (int i = 0; i < n; i++)
+            for (int j = 0; j < n; j++)
+                board[i][j] = -board[i][j];
         now_player = - now_player;
         return;
     }
@@ -57,15 +60,7 @@ void Game::get_valid_moves()
         for (int j = 0; j < n; j++)
             valids[i * n + j] = !board[i][j], cnt += !board[i][j];
 
-    valids[n * n] = !cnt;
-
-    if (cnt == n * n)
-    {
-        for (int i = 0; i < n; i++)
-            for (int j = 0; j < n; j++)
-                valids[i * n + j] = 0;
-        valids[(n / 2) * n + (n / 2)] = 1;
-    }
+    valids[n * n] = (cnt == n * n - 1) && (!valids[n * n]);
 }
 
 double Game::get_game_ended()

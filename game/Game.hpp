@@ -19,8 +19,8 @@ public:
     std::vector <std::vector<char>> board;
     std::vector <char> valids;
 
-    const int feat_cnt = 2;
-    std::vector <std::vector<char>> feat[2];
+    const int feat_cnt = 3;
+    std::vector <std::vector<char>> feat[3];
 
     Game(int _n, int _win_n);
     

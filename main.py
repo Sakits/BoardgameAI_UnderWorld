@@ -23,10 +23,10 @@ args = dotdict({
     # Dirichlet noise (should be small when num_MCTS_sims is small)
     'epsilon' : 0.25,
     # should be larger than action size to get a better result
-    'num_MCTS_sims': 800,
-    'num_fast_sims': 200,
+    'num_MCTS_sims': 500,
+    'num_fast_sims': 100,
     'prob_fast_sim': 0.75,
-    'temp_threshold': 10,
+    'temp_threshold': 14,
     'temp': 1,
     'compare_with_random': False,
     'arena_compare_random': 100,
