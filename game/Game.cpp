@@ -106,6 +106,7 @@ void Game::get_feature()
         {
             feat[0][i][j] = board[i][j] == 1;
             feat[1][i][j] = board[i][j] == -1;
+            feat[2][i][j] = 1;
         }
 }
 
