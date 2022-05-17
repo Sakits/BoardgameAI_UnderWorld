@@ -22,15 +22,16 @@ public:
     {
         friend class MCTS;
 
-        int Ns;
+        int Ns, turn;
         double Es;
         std::vector <int> son, Nsa;
         std::vector <double> Qsa, Ps;
         Game game;
 
-        node(const Game &_game, int turn):game(_game) 
+        node(const Game &_game, int _turn):game(_game) 
         {
             Ns = 0;
+            turn = _turn;
             game.get_valid_moves(turn);
             Es = game.get_game_ended();
             Ps.clear();
@@ -141,7 +142,7 @@ public:
         bool flag = 0;
         std::string s = game.stringRepresentation(canonicalBoard);
 
-        if (s == mcts[root].game.string_representation())
+        if (turn == mcts[root].turn && s == mcts[root].game.string_representation())
             return;
 
         for (uint i = 0; i < mcts[root].son.size(); i++)
