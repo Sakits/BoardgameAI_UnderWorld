@@ -73,7 +73,7 @@ class SelfPlayAgent(mp.Process):
 
     def playMoves(self):
         for i in range(self.batch_size):
-            temp = int(self.turn[i] < self.args.temp_threshold and np.random.rand() > 0.5)
+            temp = int(self.turn[i] < self.args.temp_threshold and np.random.random() > 0.5)
             if temp != 0:
                 decay = self.args.temp / self.args.temp_threshold
                 temp = temp - decay * self.turn[i]
