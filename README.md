@@ -1,9 +1,29 @@
 # UnderWorld_Boardgame-AI
-SJTU ACM班 2020级 机器学习 大作业 
+> SJTU ACM Class Machine Learning 2021 Assignment ( CS420 Course Project )
 
-### Timeline
-- 4.8 ~ 4.11：阅读相关论文，重写轮子代码，进行小模型实验
-- 4.12 ~ 4.15：验证大模型的训练可行性
-- 4.16 ~ 4.20：充分优化代码，编写游戏规则
-- 4.20 ~ 4.30：设计优化神经网络，进行小模型实验
-- 5.1 ~ 5.22：进行大模型训练，撰写论文、海报
+A superhuman Board Game AI with the AlphaZero algorithm.
+
+
+## Intro
+
+- Achieved super-human performance in 13x13 Gomoku, 9x9 Go and 9x9 Othello.
+- Train only via self-play with the fairly limited computational power of a single home PC.
+- Accelerate training by reducing the upper limit of performance that the AI can achieve, but still be able to beat top human players.
+
+## Feature
+ - **Playout cap randomization**, which is a new technique introduced by KataGo that accelerates training.
+ - **Temperature Decay**, which is a search technique that trades off randomness and quality of the play.
+ - **Random Freeze**, which plays a very important role in unbalanced games like Gomoku.
+ - **MobileNet + SENet with ConvNeXt’s tricks**, which allows MCTS to do more playouts to achieve higher performance while ensuring a significantly fast training speed.
+ 
+
+## Performance
+On the 13x13 Gomoku board, after a week of training with RTX 3080, it reached the same level as Rapfi, which is one of the strongest Gomoku AI in the world.
+
+![](images/figure4.png)
+
+![](images/figure1_2.png)
+
+![](images/figure2_2.png)
+
+![](images/figure3_2.png)
