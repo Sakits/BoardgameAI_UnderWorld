@@ -15,6 +15,8 @@ A superhuman Board Game AI with the AlphaZero algorithm.
  - **Temperature Decay**, which is a search technique that trades off randomness and quality of the play.
  - **Random Freeze**, which plays a important role in unbalanced games like Gomoku.
  - **MobileNet + SENet with ConvNeXt’s tricks**, which allows MCTS to do more playouts to achieve higher performance while ensuring a significantly fast training speed.
+ - **Multi-threaded self-play agents**.
+ - **MCTS implemented in C++, Neural Network implemented in Python, working together by pybind11**.
  
 
 ## Performance
