@@ -11,14 +11,14 @@ A superhuman Board Game AI with the AlphaZero algorithm.
 - Accelerate training by reducing the upper limit of performance that the AI can achieve, but still be able to beat top human players.
 
 ## Feature
- - **Playout cap randomization**, which is a new technique introduced by KataGo that accelerates training.
+ - **Playout Cap Randomization**, which is a new technique introduced by KataGo that accelerates training.
  - **Temperature Decay**, which is a search technique that trades off randomness and quality of the play.
- - **Random Freeze**, which plays a very important role in unbalanced games like Gomoku.
+ - **Random Freeze**, which plays a important role in unbalanced games like Gomoku.
  - **MobileNet + SENet with ConvNeXt’s tricks**, which allows MCTS to do more playouts to achieve higher performance while ensuring a significantly fast training speed.
  
 
 ## Performance
-On the 13x13 Gomoku board, after a week of training with RTX 3080, it reached the same level as Rapfi, which is one of the strongest Gomoku AI in the world.
+On the 13x13 Gomoku board, after a week of training with RTX 3080, it reached the same level as Rapfi, which is one of the strongest alpha-beta Gomoku AI in the world.
 
 ![](images/figure4.png)
 
