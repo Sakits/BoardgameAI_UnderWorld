@@ -20,7 +20,7 @@ A superhuman Board Game AI with the AlphaZero algorithm.
  
 
 ## Performance
-On the 13x13 Gomoku board, after a week of training with RTX 3080, it reached the same level as Rapfi, which is one of the strongest alpha-beta Gomoku AI in the world.
+On the 13x13 Gomoku board (swap 1 rule), after a week of training with RTX 3080, it reached the same level as Rapfi, which is one of the strongest alpha-beta Gomoku AI in the world.
 
 ![](images/figure4.png)
 
